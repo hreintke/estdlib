@@ -11,30 +11,30 @@ class ios_base
 public:
     typedef uint8_t fmtflags;
 
-    static constexpr fmtflags dec = 1;
-    static constexpr fmtflags hex = 2;
-    static constexpr fmtflags basefield = dec | hex;
+    static CONSTEXPR fmtflags dec = 1;
+    static CONSTEXPR fmtflags hex = 2;
+    static CONSTEXPR fmtflags basefield = dec | hex;
 
     typedef uint8_t openmode;
 
-    static constexpr openmode app = 0x01;
-    static constexpr openmode binary = 0x02;
-    static constexpr openmode in = 0x04;
-    static constexpr openmode out = 0x08;
+    static CONSTEXPR openmode app = 0x01;
+    static CONSTEXPR openmode binary = 0x02;
+    static CONSTEXPR openmode in = 0x04;
+    static CONSTEXPR openmode out = 0x08;
 
     typedef uint8_t iostate;
 
-    static constexpr iostate goodbit = 0x00;
-    static constexpr iostate badbit = 0x01;
-    static constexpr iostate failbit = 0x02;
-    static constexpr iostate eofbit = 0x04;
+    static CONSTEXPR iostate goodbit = 0x00;
+    static CONSTEXPR iostate badbit = 0x01;
+    static CONSTEXPR iostate failbit = 0x02;
+    static CONSTEXPR iostate eofbit = 0x04;
 
 private:
     fmtflags fmtfl;
     iostate _iostate;
 
 protected:
-    static constexpr openmode _openmode_null = 0; // proprietary, default of 'text'
+    static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
 
 public:
     fmtflags flags() const
@@ -97,8 +97,10 @@ public:
     basic_ios(stream_t &stream) : _rdbuf(stream)
     {}
 
+#ifdef FEATURE_CPP_VARIADIC
     template <class _TStream, class ...TArgs>
     basic_ios(_TStream& stream, TArgs...args) : _rdbuf(stream, args...) {}
+#endif
 
 public:
     basic_streambuf_t *rdbuf() const

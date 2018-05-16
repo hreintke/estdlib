@@ -17,11 +17,14 @@ set(SOURCE_FILES
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
         estd/internal/iostream_posix.cpp
+        estd/internal/string_convert.h
+        estd/internal/string_convert.cpp
         estd/iterators/list.h
         estd/list.h
         estd/locale.h
         estd/map.h
         estd/memory.h
+        estd/ostream.h
         estd/queue.h
         estd/string.h
         estd/streambuf.h

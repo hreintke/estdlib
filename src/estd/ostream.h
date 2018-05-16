@@ -17,13 +17,12 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 
-};
+}
 
-#include "streambuf.h"
 #include "ios.h"
-#include "string_convert.h"
+#include "internal/string_convert.h"
 
-namespace FactUtilEmbedded { namespace std {
+namespace estd {
 
 template<class TChar, class traits = char_traits<TChar>>
 class basic_ostream :
@@ -174,7 +173,7 @@ inline basic_ostream<char>& hex(basic_ostream<char>& __os)
 }
 
 
-} }
+}
 
 #ifdef ARDUINO
 #include "streams/ostream_arduino.h"
