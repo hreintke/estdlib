@@ -2,7 +2,7 @@
 
 #include "../streambuf.h"
 
-namespace FactUtilEmbedded { namespace std { namespace layer3 {
+namespace estd { namespace layer3 {
 
 template<>
 streamsize basic_streambuf<char, TEST_STREAM_T>::
@@ -40,7 +40,7 @@ int basic_streambuf<char, TEST_STREAM_T>::sgetc()
     return c;
 }
 
-} } }
+} }
 
 #endif
 

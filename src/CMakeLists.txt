@@ -12,15 +12,19 @@ set(SOURCE_FILES
         estd/forward_list.h
         estd/functional.h
         estd/initializer_list.h
+        estd/ios.h
         estd/iterator.h
         estd/internal/dynamic_array.h
         estd/internal/handle_with_offset.h
+        estd/internal/iostream_posix.cpp
         estd/iterators/list.h
         estd/list.h
+        estd/locale.h
         estd/map.h
         estd/memory.h
         estd/queue.h
         estd/string.h
+        estd/streambuf.h
         estd/traits/node_list.h
         estd/traits/allocator_traits.h
         estd/type_traits.h

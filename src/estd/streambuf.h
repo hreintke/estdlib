@@ -23,7 +23,8 @@
 #include <Arduino.h>
 #endif
 
-#include "features.h"
+//#include "features.h"
+#include "../platform.h"
 #include "locale.h"
 
 #ifdef FEATURE_IOS_EXPERIMENTAL_STREAMBUFBUF
@@ -41,7 +42,7 @@ extern "C"
 #include <stdint.h>
 }
 
-namespace FactUtilEmbedded { namespace std {
+namespace estd {
 
 
 // TODO: find a better home for char_traits and friends.  Normally it lives in <string> -
@@ -211,7 +212,7 @@ public:
 #if defined(__MBED__)
 #include "streams/iostream_mbed_streambuf.h"
 #elif defined(__POSIX__)
-#include "streams/iostream_posix_streambuf.h"
+#include "internal/iostream_posix_streambuf.h"
 #elif defined(ARDUINO)
 #include "streams/iostream_arduino_streambuf.h"
 #elif defined(ESP_OPEN_RTOS)
@@ -221,4 +222,4 @@ public:
 #endif
 #endif
 
-}}
+}
