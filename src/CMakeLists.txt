@@ -15,6 +15,7 @@ set(SOURCE_FILES
         estd/deque.h
 
         estd/exp/memory_pool.h
+        estd/exp/memory_pool_1.h
         estd/exp/observer.h
         estd/exp/tmr.h
         estd/exp/tuple.h

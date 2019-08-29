@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME} "main.cpp"
     buffer-test.cpp
     chrono-test.cpp
     experimental-test.cpp
+	experimental-mempool1-test.cpp
     functional-test.cpp
     ios-test.cpp
     list-test.cpp
