@@ -36,9 +36,11 @@ struct memory_pool
         item() : node_base_type(NULLPTR) {}
     };
 
+private:
     estd::intrusive_forward_list<item> free_nodes;
     estd::array<item, N> pool;
 
+public:
     memory_pool()
     {
         free_nodes.push_front(pool[0]);
@@ -56,7 +58,9 @@ struct memory_pool
     // internal allocate call
     item& reserve()
     {
-        return free_nodes.pop_front();
+        item& front = free_nodes.front();
+        free_nodes.pop_front();
+        return front;
     }
 
     // internal deallocate call
@@ -64,6 +68,14 @@ struct memory_pool
     void release(item& i)
     {
         free_nodes.push_front(i);
+    }
+
+    // internal call counting how many 'free_nodes' are left
+    std::size_t free_slots() const
+    {
+        // DEBT: Create and utilize 'estd::count' in algorithm.h.  Not doing so now to keep
+        // experimental changes isolated to just this area
+        return estd::distance(free_nodes.begin(), free_nodes.end());
     }
 };
 
