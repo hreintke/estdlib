@@ -20,16 +20,67 @@ TEST_CASE("experimental memory_pool_1 tests")
         // DEBT: forward_list has a lingering allocator/traits floating in it that isn't optimized out
         //REQUIRE(sz == N * sz_item + sizeof(void*));
 
-        auto free_slots = pool.free_slots();
+        SECTION("free slots")
+        {
+            auto free_slots = pool.free_slots();
 
-        REQUIRE(free_slots == N);
+            REQUIRE(free_slots == N);
 
-        memory_pool_type::item& item = pool.reserve();
+            memory_pool_type::item& item = pool.reserve();
 
-        REQUIRE(pool.free_slots() == N - 1);
+            REQUIRE(pool.free_slots() == N - 1);
 
-        pool.release(item);
+            pool.release(item);
 
-        REQUIRE(free_slots == N);
+            REQUIRE(free_slots == N);
+        }
+        SECTION("assignments")
+        {
+            // NOTE: Was able to "reuse" item from earlier code at one point.  Unexpected from
+            // a reference type
+            memory_pool_type::item& item = pool.reserve();
+            int* value = &item.value();
+
+            item.value() = N;
+
+            REQUIRE(*value == N);
+
+            SECTION("get_item_from_tracked")
+            {
+                memory_pool_type::item* retrieved_item = pool.get_item_from_tracked(value);
+
+                REQUIRE(retrieved_item == &item);
+            }
+
+            pool.release(item);
+        }
+        SECTION("free slots + assignments")
+        {
+            auto free_slots = pool.free_slots();
+
+            REQUIRE(free_slots == N);
+
+            memory_pool_type::item& item1 = pool.reserve();
+            memory_pool_type::item& item2 = pool.reserve();
+            memory_pool_type::item& item3 = pool.reserve();
+            memory_pool_type::item& item4 = pool.reserve();
+
+            item4.value() = N;
+
+            REQUIRE(pool.free_slots() == N - 4);
+
+            pool.release(item1);
+            pool.release(item2);
+            pool.release(item3);
+
+            memory_pool_type::item& item5 = pool.reserve();
+
+            REQUIRE(item4.value() == N);
+
+            pool.release(item4);
+            pool.release(item5);
+
+            REQUIRE(free_slots == N);
+        }
     }
 }

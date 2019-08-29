@@ -18,12 +18,14 @@ namespace estd { namespace experimental1 {
 
 // No attempt to conform to 'allocator' pattern, do that with an owning class with a 'has a'
 // relationship
+// TODO: Consider passing in TItem so that we can do 'type 1' item
 template <class T, std::size_t N>
 struct memory_pool
 {
     // instance provider being first base class means:
     // 1 - tracked data precedes control data
     // 2 - it's presumed 'next' is memory aligned, but that might not always be true
+    // this is a 'type 2' item
     struct item :
             estd::experimental::raw_instance_provider<T>,
             // FIX: Need explicit control over memory alignment *OR* comment as to why we don't
@@ -37,6 +39,7 @@ struct memory_pool
     };
 
 private:
+    // DEBT: forward_list has a traits/allocator empty struct gobbling up space
     estd::intrusive_forward_list<item> free_nodes;
     estd::array<item, N> pool;
 
@@ -68,6 +71,13 @@ public:
     void release(item& i)
     {
         free_nodes.push_front(i);
+    }
+
+    // given a pointer to the 'tracked data', acquire the related 'item'
+    // DEBT: Put this into traits
+    item* get_item_from_tracked(T* tracked) const
+    {
+        return reinterpret_cast<item*>(tracked);
     }
 
     // internal call counting how many 'free_nodes' are left
