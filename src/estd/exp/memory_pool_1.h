@@ -20,6 +20,8 @@ namespace estd { namespace experimental1 {
 template<class T>
 struct memory_pool_item
 {
+    typedef estd::experimental::raw_instance_provider<T> tracked_data_type;
+
     // Type 1 item node* comes first in memory
     struct type_1 :
             estd::experimental::forward_node_base_base<type_1*>,
@@ -65,6 +67,29 @@ struct memory_pool_item
         static type_2* get_item_from_tracked(T* tracked)
         {
             return reinterpret_cast<type_2*>(tracked);
+        }
+    };
+
+    // 'type 3' control data overlaps tracked data, since only one is active at a time
+    struct type_3
+    {
+        typedef estd::experimental::forward_node_base_base<type_3*> control_data_type;
+
+        union
+        {
+            tracked_data_type tracked_data;
+            control_data_type control_data;
+        };
+
+        T& value() { tracked_data.value(); }
+
+        type_3* next() { control_data.next(); }
+        void next(type_3* value) { control_data.next(value); }
+
+        // Since they occupy same memory space, a straight cast is appropriate
+        static type_3* get_item_from_tracked(T* tracked)
+        {
+            return reinterpret_cast<type_3*>(tracked);
         }
     };
 };
