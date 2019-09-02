@@ -107,5 +107,5 @@ TEST_CASE("experimental memory_pool_1 tests: type2")
 TEST_CASE("experimental memory_pool_1 tests: type3")
 {
     // forward_node_base_base constructor making this difficult, almost there
-    //basics_section<memory_pool_item<int>::type_3>();
+    basics_section<memory_pool_item<int>::type_3>();
 }

@@ -73,18 +73,19 @@ struct memory_pool_item
     // 'type 3' control data overlaps tracked data, since only one is active at a time
     struct type_3
     {
-        typedef estd::experimental::forward_node_base_base<type_3*> control_data_type;
+        //typedef estd::experimental::forward_node_base_base<type_3*> control_data_type;
 
         union
         {
             tracked_data_type tracked_data;
-            control_data_type control_data;
+            type_3* control_data_next;
         };
 
-        T& value() { tracked_data.value(); }
+        T& value() { return tracked_data.value(); }
+        const T& value() const { return tracked_data.value(); }
 
-        type_3* next() { control_data.next(); }
-        void next(type_3* value) { control_data.next(value); }
+        type_3* next() const { return control_data_next; }
+        void next(type_3* value) { control_data_next = value; }
 
         // Since they occupy same memory space, a straight cast is appropriate
         static type_3* get_item_from_tracked(T* tracked)
