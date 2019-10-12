@@ -12,6 +12,7 @@ void basics_section()
         CONSTEXPR std::size_t N = 10;
         typedef memory_pool<int, N, TItem> memory_pool_type;
         typedef typename memory_pool_type::item_type memory_pool_item_type;
+        typedef memory_pool_item_type* const memory_pool_item_pointer;
         memory_pool_type pool;
 
         /*
@@ -50,7 +51,7 @@ void basics_section()
 
             SECTION("get_item_from_tracked")
             {
-                memory_pool_item_type* retrieved_item = pool.get_item_from_tracked(value);
+                memory_pool_item_pointer retrieved_item = pool.get_item_from_tracked(value);
 
                 REQUIRE(retrieved_item == &item);
             }

@@ -64,7 +64,7 @@ struct memory_pool_item
         type_2() : node_base_type(NULLPTR) {}
 
         // DEBT: Traits is the paradigm for doing this, so put it in a traits mechanism
-        static type_2* get_item_from_tracked(T* tracked)
+        static type_2* get_item_from_tracked(T* const tracked)
         {
             return reinterpret_cast<type_2*>(tracked);
         }
@@ -85,10 +85,10 @@ struct memory_pool_item
         const T& value() const { return tracked_data.value(); }
 
         type_3* next() const { return control_data_next; }
-        void next(type_3* value) { control_data_next = value; }
+        void next(type_3* const value) { control_data_next = value; }
 
         // Since they occupy same memory space, a straight cast is appropriate
-        static type_3* get_item_from_tracked(T* tracked)
+        static type_3* get_item_from_tracked(T* const tracked)
         {
             return reinterpret_cast<type_3*>(tracked);
         }
@@ -110,13 +110,16 @@ private:
 public:
     memory_pool()
     {
+        // Seed free_nodes list with first of all pooled free nodes
         free_nodes.push_front(pool[0]);
 
         // DEBT: Use last/insert_after instead of this
         for(std::size_t j = 0; j < N - 1; j++)
         {
-            item_type& i = pool[j];
-            i.next(&pool[j + 1]);
+            item_type* const i = &pool[j];
+
+            // at each slot in the pool, link to the next empty slot
+            i->next(i + 1);
         }
 
         pool[N - 1].next(NULLPTR);
