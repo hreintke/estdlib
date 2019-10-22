@@ -55,7 +55,8 @@ TEST_CASE("tuple")
 
             int sz = sizeof(t);
 
-            REQUIRE(sz == 3);
+            // Cool, tuple_evaporator is doing its job.  Normally this would be a 3
+            REQUIRE(sz == 1);
         }
         SECTION("intermixed types")
         {
@@ -63,10 +64,9 @@ TEST_CASE("tuple")
 
             int sz = sizeof(t);
 
-            // on debian x64, this comes out to 32
-            //REQUIRE(sz == 3);
-
-            // TODO: Look into tuple<T&, TArgs...> see if we accidently light that up
+            // on debian x64, this comes out to 16, since dummy has an int and a ptr which pads
+            // up to two 8-byte words
+            REQUIRE(sz == 16);
         }
     }
 }

@@ -64,17 +64,59 @@ public:
 };
 
 
-template <class T, class ...TArgs>
-class tuple<T, TArgs...> : public tuple<TArgs...>
-{
-    T value;
+namespace experimental {
 
+template <bool is_empty, class T, class ...TArgs>
+class tuple_evaporator;
+
+template <class T, class ...TArgs>
+class tuple_evaporator<true, T, TArgs...> : public tuple<TArgs...>
+{
     typedef tuple<TArgs...> base_type;
 
 public:
+    CONSTEXPR tuple_evaporator(T&& value, TArgs&&...args) :
+            base_type(std::forward<TArgs>(args)...)
+    {}
+
+    explicit tuple_evaporator() {}
+
+    T get_value() { return T(); }
+};
+
+
+template <class T, class ...TArgs>
+class tuple_evaporator<false, T, TArgs...> : public tuple<TArgs...>
+{
+    typedef tuple<TArgs...> base_type;
+
+    T value;
+
+public:
+    CONSTEXPR tuple_evaporator(T&& value, TArgs&&...args) :
+            base_type(std::forward<TArgs>(args)...),
+            value(std::move(value))
+    {}
+
+    explicit tuple_evaporator() {}
+
+    const T& get_value() const { return value; }
+
+    T& get_value() { return value; }
+};
+
+
+}
+
+
+template <class T, class ...TArgs>
+class tuple<T, TArgs...> : public experimental::tuple_evaporator<estd::is_empty<T>::value, T, TArgs...>
+{
+    typedef experimental::tuple_evaporator<estd::is_empty<T>::value, T, TArgs...> base_type;
+
+public:
     CONSTEXPR tuple(T&& value, TArgs&&...args) :
-        base_type(std::forward<TArgs>(args)...),
-        value(std::move(value))
+        base_type(std::move(value), std::forward<TArgs>(args)...)
     {}
 
     explicit tuple() {}
@@ -83,9 +125,9 @@ public:
 
     typedef T element_type;
 
-    const T& first() const { return value; }
+    const T& first() const { return base_type::get_value(); }
 
-    T& first() { return value; }
+    T& first() { return base_type::get_value(); }
 };
 
 // lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
