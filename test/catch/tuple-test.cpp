@@ -68,5 +68,11 @@ TEST_CASE("tuple")
             // up to two 8-byte words
             REQUIRE(sz == 16);
         }
+        SECTION("getting an empty type")
+        {
+            tuple<EmptyClass> t;
+
+            EmptyClass c = estd::get<0>(t);
+        }
     }
 }

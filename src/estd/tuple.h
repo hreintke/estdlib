@@ -66,9 +66,13 @@ public:
 
 namespace experimental {
 
+// Can't reuse 'value_evaporator' because it creates ambiguous base classes without 'TArgs...'
+// to disambiguate which is which
+
 template <bool is_empty, class T, class ...TArgs>
 class tuple_evaporator;
 
+// evaporated variety (is_empty T)
 template <class T, class ...TArgs>
 class tuple_evaporator<true, T, TArgs...> : public tuple<TArgs...>
 {
@@ -81,10 +85,18 @@ public:
 
     explicit tuple_evaporator() {}
 
-    T get_value() { return T(); }
+    T& first() const
+    {
+        // NOTE: Sneaky code which may irritate some people.  Since only purely empty
+        // structs appear here, we spin up a completely invalid instance allocation
+        // for it and return a reference, so that the rest of the tuple world which very much
+        // expects a reference behaves itself
+        T t;
+        return t;
+    }
 };
 
-
+// normal instance field version
 template <class T, class ...TArgs>
 class tuple_evaporator<false, T, TArgs...> : public tuple<TArgs...>
 {
@@ -100,9 +112,9 @@ public:
 
     explicit tuple_evaporator() {}
 
-    const T& get_value() const { return value; }
+    const T& first() const { return value; }
 
-    T& get_value() { return value; }
+    T& first() { return value; }
 };
 
 
@@ -122,12 +134,6 @@ public:
     explicit tuple() {}
 
     static CONSTEXPR int index = sizeof...(TArgs);
-
-    typedef T element_type;
-
-    const T& first() const { return base_type::get_value(); }
-
-    T& first() { return base_type::get_value(); }
 };
 
 // lifted and adapted from https://gist.github.com/IvanVergiliev/9639530
