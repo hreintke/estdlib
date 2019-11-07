@@ -29,8 +29,8 @@ struct dummy_streambuf_impl
     typedef int int_type;
     typedef std::char_traits<char_type> traits_type;
 
-    int xsputn(const char_type*, int len) { return len; }
-    int xsgetn(char_type*, int len) { return len; }
+    int xsputn(const char_type*, int len, bool blocking) { return len; }
+    int xsgetn(char_type*, int len, bool blocking) { return len; }
 };
 
 typedef internal::streambuf<dummy_streambuf_impl> dummy_streambuf;

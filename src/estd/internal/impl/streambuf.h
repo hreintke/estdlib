@@ -94,7 +94,7 @@ private:
     typename TPolicy::queue_type put_area;
 
 public:
-    streamsize xsputn(const char_type* s, streamsize count)
+    streamsize xsputn(const char_type* s, streamsize count, bool blocking = true)
     {
         streamsize orig_count = count;
 
@@ -137,7 +137,7 @@ struct out_stringbuf : stringbuf_base<TString>
     template <class TParam1>
     out_stringbuf(TParam1& p) : _str(p) {}
 
-    streamsize xsputn(const char_type* s, streamsize count)
+    streamsize xsputn(const char_type* s, streamsize count, bool blocking = true)
     {
         // FIX: normal strings throw an exception if we exceed internal
         // buffer size, but here we should instead have an optional error
@@ -179,7 +179,7 @@ struct basic_stringbuf :
         base_type(p),
         get_pos(0) {}
 
-    streamsize xsgetn(char_type* s, streamsize count)
+    streamsize xsgetn(char_type* s, streamsize count, bool blocking = true)
     {
         streamsize orig_count = count;
         const char_type* src = base_type::_str.clock(get_pos, count);
@@ -273,7 +273,7 @@ struct out_span_streambuf : TBase
     char_type* pptr() const { return pbase() + pos; }
     char_type* epptr() const { return pbase() + out().size_bytes(); }
 
-    streamsize xsputn(const char_type* s, streamsize count)
+    streamsize xsputn(const char_type* s, streamsize count, bool blocking = true)
     {
         // TODO: do proper bounds checking here
         memcpy(pptr(), s, count);
@@ -370,7 +370,7 @@ protected:
         return r > 0 ? r : -1;
     }
 
-    streamsize xsgetn(char_type* s, streamsize count)
+    streamsize xsgetn(char_type* s, streamsize count, bool blocking = true)
     {
         // NOTE: No uflow/eof handling since a span unlike a netbuf is just one buffer and that's it
         streamsize c = estd::min(count, remaining());
@@ -405,8 +405,8 @@ struct basic_streambuf
 
 protected:
     //virtual int_type overflow(int_type ch) = 0;
-    virtual streamsize xsgetn(char_type* s, streamsize count) = 0;
-    virtual streamsize xsputn(const char_type* s, streamsize count) = 0;
+    virtual streamsize xsgetn(char_type* s, streamsize count, bool blocking = true) = 0;
+    virtual streamsize xsputn(const char_type* s, streamsize count, bool blocking = true) = 0;
     virtual int sync() = 0;
 };
 

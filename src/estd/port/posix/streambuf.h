@@ -71,6 +71,9 @@ typedef ::FILE& posix_stream_t;
 
 namespace impl {
 
+// NOTE: Although blocking is an optional parameter, POSIX streambuf always
+// operates in blocking mode.
+// TODO: Put in some gentle assert/warnings to remind callers of this
 struct posix_streambuf :
         native_streambuf_base<char, posix_stream_t, ::std::char_traits<char> >
 {
@@ -78,12 +81,12 @@ struct posix_streambuf :
     typedef base_type::char_type char_type;
     //typedef char char_type;
 
-    streamsize xsgetn(char_type* s, streamsize count);
-    streamsize xsputn(const char_type* s, streamsize count);
+    streamsize xsgetn(char_type* s, streamsize count, bool blocking = true);
+    streamsize xsputn(const char_type* s, streamsize count, bool blocking = true);
 
-    int sgetc();
-    int sbumpc();
-    int sputc(char);
+    int sgetc(bool blocking = true);
+    int sbumpc(bool blocking = true);
+    int sputc(char, bool blocking = true);
 
     // TODO: Might want this one day, but it will mandate carring that #include <stdio.h> around
     // though at the moment we have to do that anyway due to ::FILE

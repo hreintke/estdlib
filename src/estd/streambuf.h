@@ -50,9 +50,9 @@ public:
     ESTD_FN_HAS_METHOD(int_type, spostc, char_type)
     ESTD_FN_HAS_METHOD(int_type, speekc,)
 
-    ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
+    ESTD_FN_HAS_METHOD(int_type, sputc, char_type, bool)
     ESTD_FN_HAS_METHOD(int_type, sgetc, bool)
-    ESTD_FN_HAS_METHOD(int_type, sbumpc,)
+    ESTD_FN_HAS_METHOD(int_type, sbumpc, bool)
     ESTD_FN_HAS_METHOD(int, sync,)
     ESTD_FN_HAS_METHOD(char_type*, eback,)
     ESTD_FN_HAS_METHOD(char_type*, gptr,)
@@ -61,7 +61,7 @@ public:
     ESTD_FN_HAS_METHOD(char_type*, pptr,)
     ESTD_FN_HAS_METHOD(char_type*, epptr,)
     ESTD_FN_HAS_METHOD(int_type, underflow, bool)
-    ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
+    ESTD_FN_HAS_METHOD(int_type, overflow, int_type, bool)
     ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type, ios_base::openmode)
     ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type, ios_base::seekdir, ios_base::openmode)
 
@@ -101,14 +101,14 @@ protected:
     // maybe eof() can do that job albeit in a less informative way
     template <class T = base_type>
     typename enable_if<has_overflow_method<T>::value, int_type>::type
-    overflow(int_type ch = traits_type::eof())
+    overflow(int_type ch = traits_type::eof(), bool blocking = true)
     {
         return base_type::overflow(ch);
     }
 
     template <class T = base_type>
     typename enable_if<!has_overflow_method<T>::value, int_type>::type
-    overflow(int_type = traits_type::eof())
+    overflow(int_type = traits_type::eof(), bool blocking = true)
     {
         return traits_type::eof();
     }
@@ -140,14 +140,15 @@ public:
 
     /*
      * we expose underflow as public
-     * this call is superfluous
-     *
+     * this call may be superfluous - or maybe we need it because of the has_underflow_method behavior
+     * determine this and document it
+     */
     template <class T = this_type>
     typename enable_if<has_underflow_method<T>::value, int_type>::type
     underflow(bool blocking = true)
     {
-        return base_type::underflow();
-    } */
+        return base_type::underflow(blocking);
+    }
 
     template <class T = this_type>
     typename enable_if<!has_underflow_method<T>::value, int_type>::type
@@ -160,12 +161,14 @@ public:
     // acts like many sbumpc calls
     streamsize sgetn(char_type *s, streamsize count, bool blocking = true)
     {
-        return this->xsgetn(s, count);
+        return this->xsgetn(s, count, blocking);
     }
 
     streamsize sputn(const char_type *s, streamsize count, bool blocking = true)
     {
-        streamsize written = this->xsputn(s, count);
+        streamsize written = this->xsputn(s, count, blocking);
+
+        // FIX: this doesn't yet account for nonblocking behaviors
 
         // only interact with overflow method if it's really present
         // a little extra gauruntee for optimization
@@ -173,34 +176,36 @@ public:
         {
             s += written;
 
-            if(overflow(*s) != traits_type::eof())
+            if(overflow(*s, blocking) != traits_type::eof())
             {
                 // getting here means one more character was placed into put area
                 count -= ++written;
 
                 // a successful overflow indicates more put area
                 // is available, so give it a shot
-                written += this->xsputn(s + 1, count);
+                written += this->xsputn(s + 1, count, blocking);
             }
         }
 
         return written;
     }
 
+    // NOTE: I think I have this explicit one here because the !has_sputc_method
+    // may require it.  If not, delete it completely
     // Do SFINAE and call TImpl version if present
     template <class T = base_type>
     typename enable_if<has_sputc_method<T>::value, int_type>::type
-    sputc(char_type ch)
+    sputc(char_type ch, bool blocking = true)
     {
-        return base_type::sputc(ch);
+        return base_type::sputc(ch, blocking);
     }
 
     // if TImpl doesn't have one, use a generic one-size-fits all version
     template <class T = base_type>
     typename enable_if<!has_sputc_method<T>::value && !has_spostc_method<T>::value, int_type>::type
-    sputc(char_type ch)
+    sputc(char_type ch, bool blocking = true)
     {
-        bool success = sputn(&ch, 1) == 1;
+        bool success = sputn(&ch, 1, blocking) == 1;
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
 
@@ -221,9 +226,9 @@ public:
     // Do SFINAE and call TImpl version if present
     template <class T = this_type>
     typename enable_if<has_sbumpc_method<T>::value, int_type>::type
-    sbumpc()
+    sbumpc(bool blocking = true)
     {
-        return base_type::sbumpc();
+        return base_type::sbumpc(blocking);
     }
 
     // TODO: *possibly* implement underflow, if I like it...
@@ -411,6 +416,14 @@ public:
     {
         return this->seekoff(off, way, which);
     }
+
+    int_type uflow(bool blocking = true)
+    {
+        if(this->underflow(blocking) == traits_type::eof()) return traits_type::eof();
+        char_type ch = this->gptr();
+        this->gbump(1);
+        return traits_type::to_int_type(ch);
+    }
 };
 
 template<class TChar, class TStream, class Traits = ::std::char_traits <TChar> >
@@ -453,14 +466,14 @@ protected:
     // get at its protected methods
     TStreambuf _rdbuf;
 
-    virtual streamsize xsgetn(char_type* s, streamsize count) OVERRIDE
+    virtual streamsize xsgetn(char_type* s, streamsize count, bool blocking) OVERRIDE
     {
-        return _rdbuf.xsgetn(s, count);
+        return _rdbuf.xsgetn(s, count, blocking);
     }
 
-    virtual streamsize xsputn(const char_type* s, streamsize count) OVERRIDE
+    virtual streamsize xsputn(const char_type* s, streamsize count, bool blocking) OVERRIDE
     {
-        return _rdbuf.xsputn(s, count);
+        return _rdbuf.xsputn(s, count, blocking);
     }
 
     virtual int sync() OVERRIDE
