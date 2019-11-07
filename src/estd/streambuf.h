@@ -242,7 +242,7 @@ public:
     {
         char_type ch;
 
-        bool success = sgetn(&ch, 1) == 1;
+        bool success = sgetn(&ch, 1, blocking) == 1;
 
         return success ? traits_type::to_int_type(ch) : traits_type::eof();
     }
