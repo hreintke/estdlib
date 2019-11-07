@@ -51,7 +51,7 @@ public:
     ESTD_FN_HAS_METHOD(int_type, speekc,)
 
     ESTD_FN_HAS_METHOD(int_type, sputc, char_type)
-    ESTD_FN_HAS_METHOD(int_type, sgetc,)
+    ESTD_FN_HAS_METHOD(int_type, sgetc, bool)
     ESTD_FN_HAS_METHOD(int_type, sbumpc,)
     ESTD_FN_HAS_METHOD(int, sync,)
     ESTD_FN_HAS_METHOD(char_type*, eback,)
@@ -60,7 +60,7 @@ public:
     ESTD_FN_HAS_METHOD(char_type*, pbase,)
     ESTD_FN_HAS_METHOD(char_type*, pptr,)
     ESTD_FN_HAS_METHOD(char_type*, epptr,)
-    ESTD_FN_HAS_METHOD(int_type, underflow,)
+    ESTD_FN_HAS_METHOD(int_type, underflow, bool)
     ESTD_FN_HAS_METHOD(int_type, overflow, int_type)
     ESTD_FN_HAS_METHOD(pos_type, seekpos, off_type, ios_base::openmode)
     ESTD_FN_HAS_METHOD(pos_type, seekoff, off_type, ios_base::seekdir, ios_base::openmode)
@@ -138,28 +138,32 @@ public:
 #endif */
 
 
+    /*
+     * we expose underflow as public
+     * this call is superfluous
+     *
     template <class T = this_type>
     typename enable_if<has_underflow_method<T>::value, int_type>::type
-    underflow(int_type ch = traits_type::eof())
+    underflow(bool blocking = true)
     {
         return base_type::underflow();
-    }
+    } */
 
     template <class T = this_type>
     typename enable_if<!has_underflow_method<T>::value, int_type>::type
-    underflow(int_type = traits_type::eof())
+    underflow(bool blocking = true)
     {
         return traits_type::eof();
     }
 
     // http://putka.upm.si/langref/cplusplus.com/reference/iostream/streambuf/sgetn/index.html
     // acts like many sbumpc calls
-    streamsize sgetn(char_type *s, streamsize count)
+    streamsize sgetn(char_type *s, streamsize count, bool blocking = true)
     {
         return this->xsgetn(s, count);
     }
 
-    streamsize sputn(const char_type *s, streamsize count)
+    streamsize sputn(const char_type *s, streamsize count, bool blocking = true)
     {
         streamsize written = this->xsputn(s, count);
 
@@ -229,7 +233,7 @@ public:
             !has_sbumpc_method<T>::value &&
             !has_sgetc_method<T>::value,
             int_type>::type
-    sbumpc()
+    sbumpc(bool blocking = true)
     {
         char_type ch;
 
@@ -245,9 +249,9 @@ public:
             !has_sbumpc_method<T>::value &&
             has_sgetc_method<T>::value,
             int_type>::type
-    sbumpc()
+    sbumpc(bool blocking = true)
     {
-        int_type ch = this->sgetc();
+        int_type ch = this->sgetc(blocking);
 
         if(ch == traits_type::eof()) return traits_type::eof();
 

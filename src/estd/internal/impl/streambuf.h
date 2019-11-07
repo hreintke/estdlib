@@ -197,7 +197,7 @@ struct basic_stringbuf :
         return len > 0 ? len : -1;
     }
 
-    int_type sgetc()
+    int_type sgetc(bool = true)
     {
         // no 'underflow' for a basic string.  no more chars means no more chars, plain
         // and simple
@@ -381,7 +381,7 @@ protected:
 
 public:
     // NOTE: This would preferably not be in impl part
-    int_type sgetc()
+    int_type sgetc(bool blocking = true)
     {
         // NOTE: non-span versions would call onto underflow here
         // however, for a span, underflow never will fetch a new buffer so
