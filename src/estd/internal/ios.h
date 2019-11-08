@@ -34,6 +34,8 @@ public:
     static CONSTEXPR openmode binary = 0x02;
     static CONSTEXPR openmode in = 0x04;
     static CONSTEXPR openmode out = 0x08;
+    // Non-standard block vs nonblock flag to instruct streambuf with
+    static CONSTEXPR openmode block = 0x80;
 
     typedef uint8_t iostate;
 
@@ -51,6 +53,7 @@ public:
 private:
     fmtflags fmtfl;
     iostate _iostate;
+    openmode _openmode;
 
 protected:
     static CONSTEXPR openmode _openmode_null = 0; // proprietary, default of 'text'
@@ -63,7 +66,7 @@ protected:
     }
 
 public:
-    ios_base() : fmtfl(dec), _iostate(goodbit) {}
+    ios_base() : fmtfl(dec), _iostate(goodbit), _openmode(0) {}
 
     fmtflags setf(fmtflags flags)
     { fmtflags prior = fmtfl; fmtfl |= flags; return prior; }
@@ -99,6 +102,9 @@ public:
 
     bool eof() const
     { return rdstate() & eofbit; }
+
+    // EXPERIMENTAL
+    bool blocking() const { return _openmode & block; }
 
 protected:
     // internal call which we may make a layer0 version for optimization
