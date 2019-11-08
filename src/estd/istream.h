@@ -119,7 +119,7 @@ public:
 #ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = 1;
 #endif
-        return this->rdbuf()->sbumpc();
+        return this->rdbuf()->sbumpc(this->blocking());
     }
 
     // UNTESTED
@@ -143,7 +143,7 @@ public:
 #ifdef FEATURE_ESTD_IOS_GCOUNT
         _gcount = m;
 #endif
-        return rdbuf.sgetn(s, m);
+        return rdbuf.sgetn(s, m, this->blocking());
     }
 
     __istream_type& read(char_type* s, streamsize n)
@@ -151,7 +151,7 @@ public:
         // TODO: optimization point.  We want to do something
         // so that we don't inline this (and other read/write operations like it)
         // all over the place
-        if(this->rdbuf()->sgetn(s, n) != n)
+        if(this->rdbuf()->sgetn(s, n, this->blocking()) != n)
             // TODO: Consider setting _gcount here to what *was* returned
             this->setstate(base_t::eofbit);
 
@@ -173,7 +173,7 @@ public:
 
         for(;;)
         {
-            int_type c = stream->sbumpc();
+            int_type c = stream->sbumpc(this->blocking());
 
             if(traits_type::eq(c, traits_type::eof()))
             {

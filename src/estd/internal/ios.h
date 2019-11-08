@@ -105,6 +105,13 @@ public:
 
     // EXPERIMENTAL
     bool blocking() const { return _openmode & block; }
+    void blocking(bool b)
+    {
+        if(b)
+            _openmode |= block;
+        else
+            _openmode &= ~block;
+    }
 
 protected:
     // internal call which we may make a layer0 version for optimization
