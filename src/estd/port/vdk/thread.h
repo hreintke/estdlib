@@ -13,6 +13,16 @@ namespace thread {
 
 typedef VDK::ThreadID id;
 
+class thread
+{
+public:
+    template <class Function, class TParam1>
+    thread(Function f, TParam1 param)
+    {
+        
+    }
+};
+
 }
 
 namespace this_thread {

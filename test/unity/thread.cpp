@@ -12,7 +12,22 @@ void test_thread_get_id()
 }
 
 
+static void test_thread_ctor_fn(int param1)
+{
+
+}
+
+void test_thread_ctor()
+{
+    // NOTE: This compiles -- and we don't want it to!  Be careful
+    //estd::thread::thread spinup();
+
+    estd::thread::thread(test_thread_ctor_fn, 1);
+}
+
+
 void test_thread()
 {
     RUN_TEST(test_thread_get_id);
+    RUN_TEST(test_thread_ctor);
 }
