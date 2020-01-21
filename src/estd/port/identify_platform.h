@@ -38,6 +38,7 @@
 
 #ifdef ESTD_FREERTOS
 
+// FIX: This probably should use ENABLE_ESTD convention
 #ifndef FEATURE_ESTD_NATIVE_CHRONO
 #define FEATURE_ESTD_FREERTOS_CHRONO
 #endif

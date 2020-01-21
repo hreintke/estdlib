@@ -11,7 +11,8 @@
 #include "../ratio.h"
 #include "../limits.h"
 
-#if defined(ESTD_POSIX) && !defined(FEATURE_ESTD_NATIVE_CHRONO)
+// FIX: Document why we must filter by FEATURE_ESTD_NATIVE_CHRONO
+#if (defined(ESTD_POSIX) || defined(FEATURE_STD_CHRONO)) && !defined(FEATURE_ESTD_NATIVE_CHRONO)
 #include <chrono>
 #endif
 
