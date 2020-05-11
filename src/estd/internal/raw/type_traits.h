@@ -4,6 +4,8 @@
  */
 #pragma once
 
+#include "cstddef.h"
+
 namespace estd {
 
 template <class T> struct remove_cv;
@@ -102,5 +104,54 @@ struct enable_if {};
 
 template<class T>
 struct enable_if<true, T> { typedef T type; };
+
+
+template<class T>
+struct is_array : false_type {};
+
+template<class T>
+struct is_array<T[]> : true_type {};
+
+template<class T, std::size_t N>
+struct is_array<T[N]> : true_type {};
+
+template<class T>
+struct remove_extent { typedef T type; };
+
+template<class T>
+struct remove_extent<T[]> { typedef T type; };
+
+template<class T, std::size_t N>
+struct remove_extent<T[N]> { typedef T type; };
+
+
+// because is_function requires variadic
+#ifdef FEATURE_CPP_VARIADIC
+template< class T >
+struct decay {
+private:
+    typedef typename estd::remove_reference<T>::type U;
+public:
+    typedef typename estd::conditional<
+        estd::is_array<U>::value,
+        typename estd::remove_extent<U>::type*,
+        typename estd::conditional<
+            estd::is_function<U>::value,
+            typename estd::add_pointer<U>::type,
+            typename estd::remove_cv<U>::type
+        >::type
+    >::type type;
+};
+#endif
+
+
+#ifdef FEATURE_CPP_ALIASTEMPLATE
+template< class... >
+using void_t = void;
+
+
+template< class T >
+using decay_t = typename decay<T>::type;
+#endif
 
 }
