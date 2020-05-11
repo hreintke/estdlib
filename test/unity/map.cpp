@@ -4,7 +4,7 @@
 
 #include "unit-test.h"
 
-//#include <estd/map.h>
+#include <estd/map.h>
 
 void test_layer1_map()
 {

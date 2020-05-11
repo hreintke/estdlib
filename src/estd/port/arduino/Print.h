@@ -5,7 +5,8 @@
  */
 #pragma once
 
-#include <estd/type_traits.h>
+#include <estd/internal/platform.h>
+#include <estd/internal/raw/type_traits.h>
 
 #ifndef ENABLE_ESTD_ARDUINO_STREAMING
 #define ENABLE_ESTD_ARDUINO_STREAMING 1
